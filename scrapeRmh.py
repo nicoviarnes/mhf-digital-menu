@@ -3,6 +3,7 @@ from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 
 def scrapeRmh():
+    index = open('index.html', 'w')
     baseURL = 'http://rockridgemarkethall.com'
     followURL = '/market-hall-foods/weekly-menu'
     req = urllib.request.Request(
@@ -39,7 +40,13 @@ def scrapeRmh():
     rmhWeeklyMenuCurrent = urllib.request.urlopen(req2)
     menu = BeautifulSoup(rmhWeeklyMenuCurrent, 'html.parser')
     currentMenuTable = menu.find_all('div', class_ = 'menu')
+    
+    materializeCSS = '<link rel="stylesheet" type="text/css" href="css/materialize.min.css">\n\n'
+    materializeJS = '\n\n<script type="text/javascript" src="js/materialize.min.js"></script>'
+    jquery = '\n\n<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>'
+    altText = '<tr><th>Title/Description</th><th>Price</th></tr>'
 
-    print(currentMenuTable)
+    index.write(materializeCSS + str(currentMenuTable).strip('[]').replace(altText, '') + jquery + materializeJS)
+    index.close()
 
 scrapeRmh()
