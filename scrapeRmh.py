@@ -3,7 +3,9 @@ from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 
 def scrapeRmh():
-    index = open('index.html', 'w')
+    #pi path: /home/pi/Desktop/mhf-digital-menu/index.html
+    #local path: /users/Nico/code/mhf-digital-menu/index.html
+    index = open('/users/Nico/code/mhf-digital-menu/index.html', 'w')
     baseURL = 'http://rockridgemarkethall.com'
     followURL = '/market-hall-foods/weekly-menu'
     req = urllib.request.Request(
@@ -40,13 +42,35 @@ def scrapeRmh():
     rmhWeeklyMenuCurrent = urllib.request.urlopen(req2)
     menu = BeautifulSoup(rmhWeeklyMenuCurrent, 'html.parser')
     currentMenuTable = menu.find_all('div', class_ = 'menu')
-    
-    materializeCSS = '<link rel="stylesheet" type="text/css" href="css/materialize.min.css">\n\n'
-    materializeJS = '\n\n<script type="text/javascript" src="js/materialize.min.js"></script>'
-    jquery = '\n\n<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>'
-    altText = '<tr><th>Title/Description</th><th>Price</th></tr>'
+    currentMenuTitle = menu.find_all('h1', class_ = 'pos-title')[0]
+    currentMenuDate = menu.find_all('h2', class_ = 'pos-subtitle')[0]
 
-    index.write(materializeCSS + str(currentMenuTable).strip('[]').replace(altText, '') + jquery + materializeJS)
+    autoRefresh = '<META HTTP-EQUIV="refresh" CONTENT="500">\n\n'    
+    scripts = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">\n\n<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>\n\n<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>\n\n<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>\n\n'
+    altText = '<tr><th>Title/Description</th><th>Price</th></tr>'
+    trBugs = '<tr></tr>'
+
+    tableNoStyle = '<table id="weekly-menu">'
+    tableStyled = '<table id="weekly-menu" class="table table-dark" style="font-size: 20px">'
+    removeBoldOpen = '<strong>'
+    removeBoldClose = '</strong>'
+    h4NoStyle = '<h4>'
+    h4Styled = '<h4 style="font-size: 40px">'
+
+    h1NoStyle = '<h1 class="pos-title">'
+    h1Styled = '<div style="background-color: #cc3300"><h1 class="pos-title" style="text-align: center; color: white; font-size: 40px">'
+
+    h2NoStyle = '<h2 class="pos-subtitle">'
+    h2Styled = '<h2 class="pos-subtitle" style="text-align: center; color: white; font-size: 32px">'
+    unclosedHeaderDiv = '</h2>'
+    closedHeaderDiv = '</h2></div>'
+
+    divOpen = '<div style="display: block; overflow: auto; height: 100%; background-color: #32383e">\n\n'
+    divClose = '</div>'
+
+    MENU_HTML = autoRefresh + scripts + divOpen + str(currentMenuTitle).replace(h1NoStyle, h1Styled) + str(currentMenuDate).replace(h2NoStyle, h2Styled).replace(unclosedHeaderDiv, closedHeaderDiv) + str(currentMenuTable).strip('[]').replace(altText, '').replace(trBugs, '').replace(tableNoStyle, tableStyled).replace(removeBoldOpen, '').replace(removeBoldClose, '').replace(h4NoStyle, h4Styled) + divClose
+
+    index.write(MENU_HTML)
     index.close()
 
 scrapeRmh()
